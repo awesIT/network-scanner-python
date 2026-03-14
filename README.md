@@ -5,7 +5,7 @@
 ![Status](https://img.shields.io/badge/status-active-success)
 ## Screenshot
 
-![Scanner](screenshots/scan.png)
+![Scanner](screenshots/Scan.png)
 
 
 ## Project Structure
