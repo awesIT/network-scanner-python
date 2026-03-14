@@ -1,20 +1,26 @@
+import argparse
 import nmap
+
+# créer le parser
+parser = argparse.ArgumentParser(description="Python Network Scanner")
+
+# arguments
+parser.add_argument("-t", "--target", help="Target IP address", required=True)
+parser.add_argument("-p", "--ports", help="Port range", default="1-1024")
+
+args = parser.parse_args()
 
 scanner = nmap.PortScanner()
 
-target = input("Enter target IP: ")
+print(f"Scanning {args.target} on ports {args.ports}...")
 
-print("Scanning ports...")
-
-scanner.scan(target, '1-1024')
+scanner.scan(args.target, args.ports)
 
 for host in scanner.all_hosts():
 
     print("\nHost:", host)
 
     for proto in scanner[host].all_protocols():
-
-        print("Protocol:", proto)
 
         ports = scanner[host][proto].keys()
 
