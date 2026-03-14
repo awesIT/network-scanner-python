@@ -1,59 +1,46 @@
 import argparse
 import nmap
 from exporter import export_to_json
+from rich.console import Console
+from rich.table import Table
 
-# CLI arguments
+console = Console()
+
 parser = argparse.ArgumentParser(description="Advanced Python Network Scanner")
 
-parser.add_argument("-t", "--target", help="Target IP or Network (ex: 192.168.1.0/24)", required=True)
+parser.add_argument("-t", "--target", help="Target IP or Network", required=True)
 parser.add_argument("-p", "--ports", help="Port range", default="1-1024")
 
 args = parser.parse_args()
 
-# Initialize scanner
 scanner = nmap.PortScanner()
 
-# Dictionary to store results
 results = {}
 
-print(f"\nScanning network {args.target} on ports {args.ports}...\n")
+console.print(f"\n[bold cyan]Scanning {args.target} on ports {args.ports}...[/bold cyan]\n")
 
-# Scan network
 scanner.scan(hosts=args.target, ports=args.ports, arguments='-O')
 
-# Loop through hosts
 for host in scanner.all_hosts():
 
-    print("====================================")
-    print("Host:", host)
-    print("Status:", scanner[host].state())
+    console.print(f"[bold green]Host:[/bold green] {host}")
 
-    # Initialize host results
     results[host] = {
         "os": "unknown",
         "ports": []
     }
 
-    # MAC Address
-    if 'addresses' in scanner[host]:
-        if 'mac' in scanner[host]['addresses']:
-            mac = scanner[host]['addresses']['mac']
-            print("MAC Address:", mac)
+    # OS Detection
+    if 'osmatch' in scanner[host] and len(scanner[host]['osmatch']) > 0:
+        os_name = scanner[host]['osmatch'][0]['name']
+        console.print(f"[yellow]OS Detected:[/yellow] {os_name}")
+        results[host]["os"] = os_name
 
-            if 'vendor' in scanner[host] and mac in scanner[host]['vendor']:
-                vendor = scanner[host]['vendor'][mac]
-                print("Vendor:", vendor)
+    table = Table(title=f"Open Ports for {host}")
 
-    # OS detection
-    if 'osmatch' in scanner[host]:
-        if len(scanner[host]['osmatch']) > 0:
-            os_name = scanner[host]['osmatch'][0]['name']
-            print("OS Detected:", os_name)
-            results[host]["os"] = os_name
+    table.add_column("Port", style="cyan")
+    table.add_column("State", style="green")
 
-    print("\nOpen Ports:")
-
-    # Scan ports
     for proto in scanner[host].all_protocols():
 
         ports = scanner[host][proto].keys()
@@ -63,10 +50,13 @@ for host in scanner.all_hosts():
             state = scanner[host][proto][port]['state']
 
             if state == "open":
-                print(f"Port {port}: {state}")
+
+                table.add_row(str(port), state)
+
                 results[host]["ports"].append(port)
 
-print("\nScan finished.")
+    console.print(table)
 
-# Export results
+console.print("[bold green]\nScan finished.[/bold green]")
+
 export_to_json(results)
