@@ -1,10 +1,8 @@
 import argparse
 import nmap
 
-# créer le parser
 parser = argparse.ArgumentParser(description="Python Network Scanner")
 
-# arguments
 parser.add_argument("-t", "--target", help="Target IP address", required=True)
 parser.add_argument("-p", "--ports", help="Port range", default="1-1024")
 
@@ -28,5 +26,5 @@ for host in scanner.all_hosts():
 
             state = scanner[host][proto][port]['state']
 
-         if state == "open":
-             print(f"Port {port}: {state}")
+            if state == "open":
+                print(f"Port {port}: {state}")
