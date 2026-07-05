@@ -93,4 +93,3 @@ with ThreadPoolExecutor(max_workers=10) as executor:
 
 console.print("[bold green]\nScan finished.[/bold green]")
 export_to_json(results)
-
